@@ -4,10 +4,9 @@ API_KEY = "cisco|7tUq72zasT4sSYQNjrM5GO0KPe0n3SDPeQ6TcnXRAJU"
 ID = 11111111
 TITLE = "Test2"
 AUTHOR = "Tester2"
-URL = f"http://library.demo.local/api/v1/books/{ID}"
+URL = "http://library.demo.local/api/v1/books"
 
 headers = {
-    "accept": "application/json",
     "X-API-KEY": API_KEY,
     "Content-Type": "application/json"
 }
@@ -18,6 +17,6 @@ data = {
     "author": AUTHOR
 }
 
-response = requests.put(URL, json=data, headers=headers)
-# print(type(response))
+response = requests.post(URL, json=data, headers=headers)
+print(type(response))
 print(response.status_code)
