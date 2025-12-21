@@ -1,0 +1,7 @@
+extends: "%CALLABLE{genie.libs.sdk.genie_yamls.datafile(trigger,nxos)}"
+
+TriggerClearArpVrfAllForceDelete:
+    source:
+        class: examples.libraries.harness_custom_trigger.trigger.TriggerClearArpVrfAllForceDelete
+    devices: ['uut']
+    sleep: 10

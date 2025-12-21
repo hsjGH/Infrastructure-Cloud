@@ -1,0 +1,7 @@
+
+devices:
+  R1_xe:
+    os: iosxe
+    connections:
+      cli:
+        command: mock_device_cli --os iosxe --mock_data_dir ../../blitz/config_interface/mock_data --state connect --hostname R1_xe

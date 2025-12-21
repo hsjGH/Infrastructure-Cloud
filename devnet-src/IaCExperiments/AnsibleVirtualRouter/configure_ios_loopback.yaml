@@ -1,0 +1,17 @@
+---
+- name: CREATE LOOPBACK INTERFACE
+  hosts: csr   
+  gather_facts: False 
+  connection: network_cli 
+  become: yes
+  become_method: enable
+  tasks:
+    - name: Creating loopback 
+      ios_interface:  
+        name: Loopback241
+        enabled: True 
+        description: Loopback interface created with Ansible
+    - name: Assign IP to loopback
+      ios_l3_interface:   
+        name: Loopback241 
+        ipv4: 10.241.10.1/32 

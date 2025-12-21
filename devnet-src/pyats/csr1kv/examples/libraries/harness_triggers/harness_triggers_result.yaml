@@ -1,0 +1,27 @@
+Task-1:
+  commonCleanup:
+    name: common_cleanup
+    result: PASSED
+  commonSetup:
+    name: common_setup
+    result: PASSED
+  testcases:
+  - name: Verifications.TriggerUnconfigConfigBgp.uut
+    result: PASSED
+  - name: TriggerUnconfigConfigBgp.uut
+    result: FAILED  
+  - name: Verifications.TriggerShutNoShutBgpNeighbors.uut
+    result: BLOCKED
+  - name: TriggerShutNoShutBgpNeighbors.uut
+    result: PASSED
+  - name: Verifications.TriggerModifyLoopbackInterfaceIp.uut
+    result: PASSED
+  - name: TriggerModifyLoopbackInterfaceIp.uut
+    result: FAILED
+  - name: Verifications.TriggerShutNoShutEthernetInterface.uut
+    result: BLOCKED
+  - name: TriggerShutNoShutEthernetInterface.uut
+    result: PASSED
+  - name: Verifications.post
+    result: PASSED
+  testscript: /scratch/pyats_install_test/lib/python3.10/site-packages/genie/harness/genie_testscript.py
