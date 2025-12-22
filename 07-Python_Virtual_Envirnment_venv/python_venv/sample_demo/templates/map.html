@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Map • Ken Van Ruysseveldt</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* Map styling */
+        #map {
+            height: 500px !important;
+            /* forceer hoogte */
+            width: 90%;
+            margin: 30px auto;
+            border-radius: 12px;
+            background: lightgrey;
+            /* tijdelijk voor debugging */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVIGATION -->
+    <nav class="navbar">
+        <div class="nav-logo">KenVR</div>
+
+        <ul class="nav-links">
+            <li><a href="/" class="{{ 'active' if request.path == '/' else '' }}">Home</a></li>
+            <li><a href="/date" class="{{ 'active' if request.path == '/date' else '' }}">Date</a></li>
+            <li><a href="/map" class="{{ 'active' if request.path == '/map' else '' }}">Map</a></li>
+        </ul>
+
+        <div class="nav-toggle" onclick="toggleMenu()">☰</div>
+    </nav>
+
+    <!-- BANNER -->
+    <header class="banner">
+        <div class="banner-content">
+            <h1>Your Location</h1>
+            <p class="subtitle">Leaflet + Browser Geolocation</p>
+        </div>
+    </header>
+
+    <!-- MAP SECTION -->
+    <section class="section">
+        <h2 style="text-align:center;">Your Current Position</h2>
+        <div id="map"></div>
+        <p id="locationStatus" style="text-align:center; margin-top:10px;"></p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>© 2025 Ken Van Ruysseveldt – Flask Demo App</p>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("open");
+        }
+
+        // Fade-in animatie trigger (optioneel, zoals in index.html)
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".section").forEach(sec => sec.classList.add("visible"));
+        });
+
+        // Map setup
+        const statusBox = document.getElementById("locationStatus");
+        const mapDiv = document.getElementById("map");
+
+        // fallback locatie: Opwijk
+        const fallbackLat = 50.9947;
+        const fallbackLon = 4.0978;
+
+        function initMap(lat, lon, msg) {
+            statusBox.textContent = msg;
+
+            // kleine timeout zodat de container correct gerenderd is
+            setTimeout(() => {
+                const map = L.map(mapDiv).setView([lat, lon], 13);
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(map);
+                L.marker([lat, lon]).addTo(map).bindPopup(msg).openPopup();
+                map.invalidateSize(); // forceert Leaflet om de container grootte te updaten
+            }, 100);
+        }
+
+        if (navigator.geolocation) {
+            statusBox.textContent = "Requesting your location...";
+            navigator.geolocation.getCurrentPosition(
+                pos => initMap(pos.coords.latitude, pos.coords.longitude, "You are here"),
+                err => initMap(fallbackLat, fallbackLon, "Unable to get location, showing fallback")
+            );
+        } else {
+            initMap(fallbackLat, fallbackLon, "Geolocation not supported, showing fallback");
+        }
+    </script>
+
+</body>
+
+</html>
