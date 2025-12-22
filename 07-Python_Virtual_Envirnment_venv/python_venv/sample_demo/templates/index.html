@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sample app: Ken Van Ruysseveldt</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+
+    <!-- NAVIGATION -->
+    <nav class="navbar">
+        <div class="nav-logo">KenVR</div>
+
+        <ul class="nav-links">
+            <li><a href="/" class="{{ 'active' if request.path == '/' else '' }}">Home</a></li>
+            <li><a href="/date" class="{{ 'active' if request.path == '/date' else '' }}">Date</a></li>
+            <li><a href="/map" class="{{ 'active' if request.path == '/map' else '' }}">Map</a></li>
+        </ul>
+
+        <div class="nav-toggle" onclick="toggleMenu()">☰</div>
+    </nav>
+
+    <!-- BANNER -->
+    <header class="banner">
+        <div class="banner-content">
+            <h1>Ken Van Ruysseveldt</h1>
+            <p class="subtitle">Full Stack Flask Demo • Powered by Python</p>
+        </div>
+    </header>
+
+    <!-- HERO / MAIN -->
+    <section class="hero">
+        <div class="hero-box">
+            <h2>Your IP Address</h2>
+            <p class="ip">You are calling me from {{ request.remote_addr }}</p>
+        </div>
+    </section>
+
+    <!-- CONTENT SECTION -->
+    <section id="about" class="section">
+        <h2>About This App</h2>
+        <p>
+            This is a Flask-powered demonstration website with enhanced visuals,
+            responsive layout, animations, and integrated JavaScript for better UX.
+            Minimalistic but clean, modern and deploy-ready.
+        </p>
+    </section>
+
+    <section id="info" class="section alt">
+        <h2>Extra Information</h2>
+        <p>
+            Everything on this page is dynamically served. Your IP address is injected
+            directly from Flask using server-side rendering.
+        </p>
+    </section>
+
+    <section id="contact" class="section">
+        <h2>Contact</h2>
+        <p>
+            This section doesn't actually contact anyone, but it sure looks like it could.
+        </p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>© 2025 Ken Van Ruysseveldt – Flask Demo App</p>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("open");
+        }
+
+        // Fade-in animation trigger
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".section").forEach(sec => {
+                sec.classList.add("visible");
+            });
+        });
+    </script>
+
+</body>
+
+</html>

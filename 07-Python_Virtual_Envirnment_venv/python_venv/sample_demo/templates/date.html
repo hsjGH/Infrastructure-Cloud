@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Date • KenVR</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+
+    <!-- NAV -->
+    <nav class="navbar">
+        <div class="nav-logo">KenVR</div>
+
+        <ul class="nav-links">
+            <li><a href="/" class="{{ 'active' if request.path == '/' else '' }}">Home</a></li>
+            <li><a href="/date" class="{{ 'active' if request.path == '/date' else '' }}">Date</a></li>
+            <li><a href="/map" class="{{ 'active' if request.path == '/map' else '' }}">Map</a></li>
+        </ul>
+
+        <div class="nav-toggle" onclick="toggleMenu()">☰</div>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <header class="banner small-banner">
+        <div class="banner-content">
+            <h1>Your Local Date & Time</h1>
+            <p class="subtitle">Powered by your browser</p>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-box">
+            <h2>Current Date & Time</h2>
+            <p id="currentDateTime" style="font-size: 1.4rem; font-weight: bold;"></p>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 Ken Van Ruysseveldt – Flask Demo App</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("open");
+        }
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById("currentDateTime").textContent = now.toLocaleString();
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+
+</body>
+
+</html>
