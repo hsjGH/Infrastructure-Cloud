@@ -5,4 +5,7 @@ sudo apt-get install openssh-server
 sudo apt-get install sshpass
 
 # enable ssh server
-sudo systemctl start ssh
+sudo sytemctl start ssh
+
+# check if ansible is running
+echo "ansible --version"

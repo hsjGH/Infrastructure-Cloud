@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Live Location Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      #map {
+        height: 100%;
+        width: 100%;
+      }
+      .popup-content {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(pos) {
+          var lat = pos.coords.latitude;
+          var lon = pos.coords.longitude;
+
+          var map = L.map('map').setView([lat, lon], 13);
+
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+          }).addTo(map);
+
+          L.marker([lat, lon]).addTo(map)
+            .bindPopup('<div class="popup-content">You are here!</div>')
+            .openPopup();
+        }, function() {
+          document.body.innerHTML = "<p style='text-align:center;margin-top:50px;font-size:1.5em;'>Could not get location</p>";
+        });
+      } else {
+        document.body.innerHTML = "<p style='text-align:center;margin-top:50px;font-size:1.5em;'>Geolocation not supported</p>";
+      }
+    </script>
+  </body>
+</html>

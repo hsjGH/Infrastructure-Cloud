@@ -1,9 +1,64 @@
 <html>
-<head>
-    <title>Ansible Apache Installation Experiment 3</title>
-</head>
-<body>
-    <h1>Installed by Ansible</h1>
-    <h2>Experiment succeeded</h2>
-</body>
+  <head>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+        color: #fff;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        gap: 20px;
+      }
+      h1 {
+        font-size: 3em;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        margin: 0;
+      }
+      .info {
+        font-size: 1.5em;
+        background: rgba(0,0,0,0.3);
+        padding: 15px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      }
+      a {
+        color: #FFD700;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+      a:hover {
+        text-decoration: underline;
+        color: #fffa00;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Logo: developed by Ken</h1>
+      <div class="info">Current IP Address: <span id="ip">loading...</span></div>
+      <div class="info">Current date and time: <span id="datetime"></span></div>
+      <div class="info"><a href="maps.html">Map of my current location</a></div>
+    </div>
+
+    <script>
+      const now = new Date();
+      document.getElementById('datetime').innerText = now.toLocaleString();
+
+      fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('ip').innerText = data.ip;
+        })
+        .catch(() => { document.getElementById('ip').innerText = 'Unable to fetch IP'; });
+    </script>
+  </body>
 </html>
