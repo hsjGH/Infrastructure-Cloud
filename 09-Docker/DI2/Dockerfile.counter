@@ -1,0 +1,17 @@
+# Gebruik lichte Python image
+FROM python:3.11-slim
+
+# Werkdirectory in container
+WORKDIR /app
+
+# Installeer Flask
+RUN pip install flask
+
+# Kopieer de counter app
+COPY counter_app.py .
+
+# Open poort 5001
+EXPOSE 5001
+
+# Start de counter app
+CMD ["python", "counter_app.py"]

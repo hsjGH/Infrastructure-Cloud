@@ -1,0 +1,60 @@
+pipeline {
+    agent any  // Kan op elke beschikbare Jenkins agent draaien
+
+    // Omgevingsvariabelen voor Docker image en container namen
+    environment {
+        IMAGE_NAME = "jenkinslabapp"
+        CONTAINER_NAME = "jenkinslabrunning"
+    }
+
+    stages {
+        stage('Prepare') {
+            steps {
+                // Schoonmaken van workspace zodat er geen oude bestanden blijven
+                echo "Cleaning workspace..."
+                sh 'rm -rf *'
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                // Hier kopieer je lokaal of uit Git de broncode
+                echo "Copying files..."
+                sh 'cp -r ../flask_lab/* .'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                // Bouw het Docker image met de naam IMAGE_NAME
+                sh "docker build -t ${IMAGE_NAME} ."
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                // Stop en verwijder een oude container indien aanwezig
+                // Start vervolgens de nieuwe container op poort 5000
+                sh """
+                docker rm -f ${CONTAINER_NAME} || true
+                docker run -d -p 5000:5000 --name ${CONTAINER_NAME} ${IMAGE_NAME}
+                docker ps -a  // Laat alle actieve containers zien
+                """
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Controleer of de app bereikbaar is
+                sh 'curl -f http://localhost:5000 || exit 1'
+            }
+        }
+    }
+
+    post {
+        always {
+            // Bericht altijd bij afronding van de pipeline
+            echo "Pipeline finished."
+        }
+    }
+}
