@@ -1,0 +1,16 @@
+---
+- name: "Configure multiple server roles"
+  hosts: servers
+  become: yes
+
+  tasks:
+    - name: Ensure htop installed
+      ansible.builtin.package:
+        name: htop
+        state: present
+
+    - name: Create a system user
+      ansible.builtin.user:
+        name: monitoring
+        state: present
+        groups: sudo

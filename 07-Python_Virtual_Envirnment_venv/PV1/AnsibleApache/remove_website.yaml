@@ -1,0 +1,15 @@
+---
+- name: Remove Apache example.com pages
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Remove home page
+      file:
+        path: /var/www/example.com/index.html
+        state: absent
+
+    - name: Remove maps page
+      file:
+        path: /var/www/example.com/maps.html
+        state: absent

@@ -1,0 +1,14 @@
+---
+- name: "Configure basic router settings"
+  hosts: network_devices
+  connection: network_cli
+  gather_facts: no
+
+  tasks:
+    - name: Set hostname
+      ansible.netcommon.cli_config:
+        lines:
+          - hostname RouterLab
+    - name: Save running config
+      ansible.netcommon.cli_command:
+        command: "write memory"

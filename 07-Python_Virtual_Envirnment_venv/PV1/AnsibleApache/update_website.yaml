@@ -1,0 +1,226 @@
+---
+- name: Install and configure Apache with VirtualHosts and live maps
+  hosts: webservers
+  become: true
+
+  vars:
+    # Homepagina met dynamische datum/tijd en IP via JS
+    home_content: |
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+              color: #fff;
+              text-align: center;
+              margin: 0;
+              padding: 0;
+            }
+            .container {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              gap: 20px;
+            }
+            h1 {
+              font-size: 3em;
+              text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+              margin: 0;
+            }
+            .info {
+              font-size: 1.5em;
+              background: rgba(0,0,0,0.3);
+              padding: 15px 25px;
+              border-radius: 12px;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+            a {
+              color: #FFD700;
+              text-decoration: none;
+              font-weight: bold;
+              transition: 0.3s;
+            }
+            a:hover {
+              text-decoration: underline;
+              color: #fffa00;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Logo: developed by Ken</h1>
+            <div class="info">Current IP Address: <span id="ip">loading...</span></div>
+            <div class="info">Current date and time: <span id="datetime"></span></div>
+            <div class="info"><a href="maps.html">Map of my current location</a></div>
+          </div>
+
+          <script>
+            const now = new Date();
+            document.getElementById('datetime').innerText = now.toLocaleString();
+
+            fetch('https://api.ipify.org?format=json')
+              .then(response => response.json())
+              .then(data => {
+                document.getElementById('ip').innerText = data.ip;
+              })
+              .catch(() => { document.getElementById('ip').innerText = 'Unable to fetch IP'; });
+          </script>
+        </body>
+      </html>
+
+    # Maps pagina met live locatie van gebruiker via Leaflet/OpenStreetMap
+    maps_content: |
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Live Location Map</title>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+          <style>
+            body, html {
+              margin: 0;
+              padding: 0;
+              height: 100%;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+            #map {
+              height: 100%;
+              width: 100%;
+            }
+            .popup-content {
+              font-size: 1.2em;
+              font-weight: bold;
+              color: #000;
+            }
+          </style>
+        </head>
+        <body>
+          <div id="map"></div>
+          <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+          <script>
+            if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(function(pos) {
+                var lat = pos.coords.latitude;
+                var lon = pos.coords.longitude;
+
+                var map = L.map('map').setView([lat, lon], 13);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                  maxZoom: 19
+                }).addTo(map);
+
+                L.marker([lat, lon]).addTo(map)
+                  .bindPopup('<div class="popup-content">You are here!</div>')
+                  .openPopup();
+              }, function() {
+                document.body.innerHTML = "<p style='text-align:center;margin-top:50px;font-size:1.5em;'>Could not get location</p>";
+              });
+            } else {
+              document.body.innerHTML = "<p style='text-align:center;margin-top:50px;font-size:1.5em;'>Geolocation not supported</p>";
+            }
+          </script>
+        </body>
+      </html>
+
+  tasks:
+    # 1. Apache installeren
+    - name: Install Apache
+      apt:
+        name: apache2
+        state: latest
+        update_cache: yes
+
+    # 2. Configure Apache to listen on custom port 8808
+    - name: Configure Apache to listen on port 8808
+      lineinfile:
+        path: /etc/apache2/ports.conf
+        regexp: '^Listen '
+        line: 'Listen 8808'
+        state: present
+
+    # 3. Zorg dat de DocumentRoot directories bestaan
+    - name: Ensure DocumentRoot directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        recurse: yes
+      loop:
+        - /var/www/example.com
+        - /var/www/another.com
+
+    # 4. VirtualHost configureren voor example.com
+    - name: Configure VirtualHost for example.com
+      copy:
+        dest: /etc/apache2/sites-available/example.conf
+        content: |
+          <VirtualHost *:8808>
+            ServerName www.example.com
+            DocumentRoot /var/www/example.com
+          </VirtualHost>
+
+    # 5. VirtualHost configureren voor another.com
+    - name: Configure VirtualHost for another.com
+      copy:
+        dest: /etc/apache2/sites-available/another.conf
+        content: |
+          <VirtualHost *:8808>
+            ServerName www.another.com
+            DocumentRoot /var/www/another.com
+          </VirtualHost>
+
+    # 6. Schakel de standaard Apache-site uit (000-default)
+    - name: Disable default Apache site
+      command: a2dissite 000-default.conf
+      args:
+        removes: /etc/apache2/sites-enabled/000-default.conf
+      notify: Reload Apache
+
+    # 7. Activeer je eigen VirtualHosts
+    - name: Enable sites
+      command: a2ensite {{ item }}
+      loop:
+        - example.conf
+        - another.conf
+      notify: Reload Apache
+
+    # 8. Plaats de homepagina op de server
+    - name: Place home page
+      copy:
+        dest: /var/www/example.com/index.html
+        content: "{{ home_content }}"
+
+    # 9. Plaats de maps pagina op de server
+    - name: Place maps page
+      copy:
+        dest: /var/www/example.com/maps.html
+        content: "{{ maps_content }}"
+
+    # 10. Schrijf de bestanden ook lokaal weg
+    - name: Write home page locally
+      copy:
+        dest: ./files/index.html
+        content: "{{ home_content }}"
+      delegate_to: localhost
+
+    - name: Write maps page locally
+      copy:
+        dest: ./files/maps.html
+        content: "{{ maps_content }}"
+      delegate_to: localhost
+
+    # 11. Start Apache definitief
+    - name: Start Apache
+      service:
+        name: apache2
+        state: restarted
+        enabled: yes
+
+  handlers:
+    - name: Reload Apache
+      service:
+        name: apache2
+        state: reloaded

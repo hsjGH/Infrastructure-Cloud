@@ -1,0 +1,16 @@
+---
+# AN3 – Cloud sandbox network device
+- name: "Gather sandbox device facts"
+  hosts: network_devices
+  connection: network_cli
+  gather_facts: no
+
+  tasks:
+    - name: Show ARP table
+      ansible.netcommon.cli_command:
+        command: "show arp"
+      register: arp_out
+
+    - name: Display ARP
+      debug:
+        var: arp_out.stdout
