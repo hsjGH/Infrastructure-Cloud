@@ -1,0 +1,44 @@
+---
+# JS1 - Model voor interfaces van een network device
+# Dit playbook haalt de interfaces van een Cisco device op
+# en kan gebruikt worden om het netwerkmodel te vullen of te testen.
+
+- name: INTERFACE ADDRESSING
+  hosts: sandbox           # Het target device (sandbox)
+  gather_facts: false      # Geen facts ophalen, enkel commando's
+  connection: local        # Aangezien ios_command lokaal draait op Ansible control node
+
+  tasks: 
+    - name: Run "show ip interface brief"
+      ios_command:
+        commands: 
+          - show ip interface brief   # Haal status en IP's van interfaces op
+      register: interfaces        # Sla output op in variabele
+
+    - name: Display interface output
+      debug:
+        var: interfaces["stdout_lines"][0]  # Print de eerste outputlijn van stdout
+
+    - name: Transform interfaces to structured YAML
+      set_fact:
+        interfaces_model: >   # Maak een gestructureerd model van interfaces
+          {%- set intf_list = [] -%}
+          {%- for line in interfaces.stdout[0].splitlines()[1:] -%}
+          {%- set fields = line.split() -%}
+          {%- set _ = intf_list.append({
+                "name": fields[0],
+                "ip_address": fields[1],
+                "status": fields[4],
+                "protocol": fields[5]
+              }) -%}
+          {%- endfor -%}
+          {{ intf_list }}
+
+    - name: Display structured interface model
+      debug:
+        var: interfaces_model   # Toon gestructureerde lijst van interfaces
+
+    - name: Save interface model to file (optioneel)
+      copy:
+        dest: "./interfaces_model.yml"
+        content: "{{ interfaces_model | to_nice_yaml }}"  # Sla model op als YAML
