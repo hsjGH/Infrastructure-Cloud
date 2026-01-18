@@ -1,3 +1,8 @@
+import json
+
+# Dictionary dat IPv4 subnet masks mapt naar CIDR-prefixen
+# Dit wordt vaak gebruikt in netwerkautomatisatie om legacy masks
+# om te zetten naar CIDR-notatie
 netmask_prefixes = {
     '255.255.255.255': '/32',
     '255.255.255.254': '/31',
@@ -27,42 +32,52 @@ netmask_prefixes = {
 }
 
 def get_net_prefix(p_subnet_mask):
-    try: 
-        net_prefix = netmask_prefixes[p_subnet_mask]
-        return net_prefix
+    """
+    Zet een subnet mask om naar CIDR-prefix.
+    Indien het subnet mask niet bestaat in de mapping,
+    wordt een foutmelding teruggegeven.
+    """
+    try:
+        return netmask_prefixes[p_subnet_mask]
     except KeyError:
-        return "Wrong input: garbage in, garbage out"
+        return "Invalid subnet mask"
 
-# Dev test function
+# Test: gebruiker geeft subnet mask in
 subnet_input = input('Wat is je subnet mask? ')
 net_prefix = get_net_prefix(subnet_input)
-print(f"Je Prefix is: {net_prefix}")
+print(f"Je prefix is: {net_prefix}")
 
-
-
-import json
+# Controle van datatypes (dict vs string)
 print(type(net_prefix))
 print(type(netmask_prefixes))
 
-# Maak van een dict een string
+# Conversie van dictionary naar JSON-string
 netmask_pref_str = json.dumps(netmask_prefixes)
 print(type(netmask_pref_str))
-# Maak van een string een dict
+
+# Conversie van JSON-string terug naar dictionary
 netmask_pref_dict = json.loads(netmask_pref_str)
-print(type(netmask_pref_str))
-
-
+print(type(netmask_pref_dict))
 
 def get_number_ip_addresses(p_prefix):
-    pbits = 32-int(p_prefix[1:])
-    return 2 ** pbits
+    """
+    Berekent het totaal aantal IP-adressen in een subnet
+    op basis van het CIDR-prefix.
+    """
+    host_bits = 32 - int(p_prefix[1:])
+    return 2 ** host_bits
 
 def get_number_ip_hosts(p_prefix):
-    pbits = get_number_ip_addresses(p_prefix)
-    return pbits - 2
+    """
+    Berekent het aantal bruikbare hosts in een subnet.
+    Netacad-regel: netwerkadres en broadcastadres worden afgetrokken.
+    """
+    total_addresses = get_number_ip_addresses(p_prefix)
+    return total_addresses - 2
 
-# dev test function
+# Test met een klassiek /24 netwerk
 net_number_addr = get_number_ip_addresses('/24')
 net_number_ip_hosts = get_number_ip_hosts('/24')
+
 print(net_number_addr)
 print(net_number_ip_hosts)
